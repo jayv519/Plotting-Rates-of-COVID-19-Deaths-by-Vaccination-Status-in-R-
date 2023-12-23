@@ -1,0 +1,234 @@
+---
+title: "COVID-19 Deaths By Vaccination Status"
+author: "Jorge Valderrama"
+date: "2023-12-23"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Importing Data
+```{r}
+#read data
+setwd("~/Downloads")
+USACOVID <- read.csv ("COVID_Data_R2.csv")
+
+```
+## Loading Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(ggthemes)
+library(gganimate)
+
+```
+##Demonstrating Untidy Data
+```{r}
+USACOVID
+```
+##Making Data Tidy
+```{r}
+tidyUSACOVID <-USACOVID %>% 
+  pivot_longer(cols = -Month)
+
+```
+##Demonstrating Tidy Data
+```{r}
+tidyUSACOVID
+```
+##Loading lubridate package to change the “Month” column from character type variable to a date type variable
+```{r}
+library(lubridate)
+```
+##Changing variable type for “Month” variable
+```{r}
+tidyUSACOVID$Month <- mdy(tidyUSACOVID$Month)
+```
+##Demonstrating change in variable type
+```{r}
+tidyUSACOVID
+```
+##Creating a line graph to demonstrate differences in COVID-19 death rates among fully vaccinated and unvaccinated individuals over time.
+```{r}
+ggplot(data=tidyUSACOVID, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Deaths by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 14))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 10))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,5))+
+  labs(y = "Deaths per 100,000 population", subtitle = "August 1, 2022 - March 26, 2023 (23 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-03-26')), expand=c(0,0))
+
+```
+##Creating an animated plot
+```{r}
+#Need to delete any NAs for an animated plot to work
+tidyUSACOVID <- na.omit(tidyUSACOVID)
+
+ggplot(data=tidyUSACOVID, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Deaths by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 13))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 8.5))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,5))+
+  labs(y = "Deaths per 100,000 population", subtitle = "August 1, 2022 - March 26, 2023 (23 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-03-26')), expand=c(0,0))+
+  transition_reveal(Month)
+
+```
+
+##Creating a plot for COVID-19 cases by vaccination status
+```{r}
+USACOVIDCASES <- read.csv ("COVID_Data_R3.csv")
+```
+
+```{r}
+tidyUSACOVIDCASES <-USACOVIDCASES %>% 
+  pivot_longer(cols = -Month)
+```
+
+```{r}
+tidyUSACOVIDCASES
+```
+```{r}
+tidyUSACOVIDCASES$Month <- mdy(tidyUSACOVIDCASES$Month)
+```
+
+```{r}
+tidyUSACOVIDCASES
+```
+```{r}
+ggplot(data=tidyUSACOVIDCASES, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Cases by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 14))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 10))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,600))+
+  labs(y = "Cases per 100,000 population", subtitle = "August 1, 2022 - April 16, 2023 (24 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-04-16')), expand=c(0,0))
+```
+##Creating animated plot
+```{r}
+#Need to delete any NAs for an animated plot to work
+tidyUSACOVIDCASES <- na.omit(tidyUSACOVIDCASES)
+
+ggplot(data=tidyUSACOVIDCASES, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Cases by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 13))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 8.5))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,600))+
+  labs(y = "Cases per 100,000 population", subtitle = "August 1, 2022 - April 16, 2023 (24 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-04-16')), expand=c(0,0))+
+  transition_reveal(Month)
+
+```
+##Installing the gifski package in order to save animated plots as gifs
+```{r}
+install.packages("gifski")
+```
+
+```{r}
+anim_save("COVID Deaths by Vax Status.gif", animation)
+```
+
+##Saving the cases by vax status animated plot for a gif
+```{r}
+animated_plot <- ggplot(data=tidyUSACOVID, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Deaths by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 13))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 8.5))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,5))+
+  labs(y = "Deaths per 100,000 population", subtitle = "August 1, 2022 - March 26, 2023 (23 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-03-26')), expand=c(0,0))+
+  transition_reveal(Month)
+```
+
+```{r}
+COVID_Deaths <- animate(animated_plot)
+```
+
+```{r}
+anim_save("COVID Deaths by Vax Status.gif", COVID_Deaths)
+```
+
+#Saving the cases by vax status animated plot for a gif
+```{r}
+animated_plot2 <- ggplot(data=tidyUSACOVIDCASES, aes(x=Month, y=value, group=name, color=name))+
+  geom_line(size = 1.25)+
+  ggtitle("Rates of COVID-19 Cases by Vaccination Status in Ages 18 and Older")+
+  theme_clean()+
+  theme(axis.text.x=element_text(angle=60, hjust=1, face = "bold"))+
+  theme(axis.title.y=element_text(size=14,face="bold"))+
+  theme(plot.title = element_text(hjust = 0.5, lineheight = 0.9))+
+  theme(plot.title = element_text(face = "bold", size = 13))+
+  theme(axis.title.x = element_blank())+
+  theme(legend.title = element_blank())+
+  theme(legend.text = element_text(face = "bold", size = 8.5))+
+  theme(legend.position = "bottom")+
+  scale_y_continuous(limits=c(0,600))+
+  labs(y = "Cases per 100,000 population", subtitle = "August 1, 2022 - April 16, 2023 (24 U.S. Jurisdictions)")+
+  theme(plot.subtitle = element_text(hjust=0.5))+
+  scale_color_hue(labels=c('Unvaccinated', 'Vaccinated with updated booster', 'Vaccinated without updated booster'))+
+  scale_x_date(date_breaks= "1 month", date_labels = "%b %Y", limit=as.Date(c('2022-08-01', '2023-04-16')), expand=c(0,0))+
+  transition_reveal(Month)
+```
+
+```{r}
+COVID_Cases <- animate(animated_plot2)
+```
+
+```{r}
+anim_save("COVID Cases by Vax Status.gif", COVID_Cases)
+```
+
